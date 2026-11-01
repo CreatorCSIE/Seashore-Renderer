@@ -2,7 +2,7 @@
 
 `Seashore Renderer` 是 [Seashore-Launcher](https://github.com/CreatorCSIE/Seashore-Launcher)（远古 Minecraft Android 启动器）的**渲染器特化 fork**：以 [Krypton Wrapper / NG-GL4ES 0.4.5](https://github.com/BZLZHH/NG-GL4ES)（本身为 [gl4es](https://github.com/ptitSeb/gl4es) + [gl4es-114-extra](https://github.com/PojavLauncherTeam/gl4es-114-extra) 双 fork）为基座，面向远古版本线（Pre-Classic → b1.8 / 1.5.2）做修复与裁剪，作为启动器内与 Krypton 并列的"Seashore 渲染器"条目出货。
 
-**当前处于工单期**：fork 基点 `6e153a1`（0.4.5，submodule 齐），基座构建（工单①）进行中，暂无发布构件。施工与验收以 [plan.md](./plan.md) 为准。
+**当前处于工单期**：fork 基点 `6e153a1`（0.4.5，submodule 齐）；工单①②已完成（2026-11-01，commit `0dfa67e`），双 ABI 产物暂存 `dist/<abi>/libss_gl4es.so`（未发布，待工单③入库主仓）。施工与验收以 [plan.md](./plan.md) 为准。
 
 ## 为什么存在这个 fork
 
@@ -14,7 +14,7 @@ case GL_C3F_V3F:
     vert = 4;   // ← 应为 3。规范 C3F+V3F = 6 float = 24B stride
 ```
 
-`vert=4` 使 stride 误算为 28、vertex size=4、偏移 +12 → 逐顶点错位 4 字节 → 垃圾颜色（品红/黄/青）+ 垃圾坐标（天空巨型三角）。修复 `vert=4→3` 已在 1.1.4 基座 + Android AVD 终验通过（坏窗口 c0.0.14a_08 天空与生成进度色污染全消），本仓直移至 Krypton 基座（`src/gl/gl4es.c`，工单②）。
+`vert=4` 使 stride 误算为 28、vertex size=4、偏移 +12 → 逐顶点错位 4 字节 → 垃圾颜色（品红/黄/青）+ 垃圾坐标（天空巨型三角）。修复 `vert=4→3` 已在 1.1.4 基座 + Android AVD 终验通过（坏窗口 c0.0.14a_08 天空与生成进度色污染全消），本仓已直移至 Krypton 基座（[src/gl/gl4es.c](./src/gl/gl4es.c) L222，工单②完成）；本基座上的 AVD 坏窗口回归（c0.0.14a_08 / c0.0.23a_01）待主 Phase 执行。
 
 ## 三面账（职责边界）
 
@@ -31,6 +31,16 @@ case GL_C3F_V3F:
 - **工具链**：NDK **r30**（硬约束 `CMAKE_CXX_STANDARD 23` → 下限 r26/clang 17+）+ CMake 交叉编译；产物 `libng_gl4es.so`（SHARED，LTO + `--gc-sections` + strip）。
 - **Android 是一等目标**：`CMakeLists.txt` 自带 `if(ANDROID)` 分支（`-DNOX11`、排除 `src/glx/glx.c`、链 `android`/`log`）；EGL 运行时 dlopen，context 由启动器 `jre_launcher` 创建——与 Pojav gl4es-114-extra 同形态。
 - **ABI**：首发 arm64-v8a + x86_64（AVD 验证优先）；armeabi-v7a 跟进；x86(32) best-effort 或不 ship。
+- **实测配方**（工单①跑通，Windows + NDK r30 + CMake ≥3.29 + Ninja）：
+
+```powershell
+cmake -G Ninja -B build/<abi> `
+  -DCMAKE_TOOLCHAIN_FILE="$NDK\build\cmake\android.toolchain.cmake" `
+  -DANDROID_ABI=<abi> -DANDROID_PLATFORM=android-21 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/<abi> --target ng_gl4es
+```
+
+  产物复核：ELF64 对应各 ABI 机器码；NEEDED 仅 `libandroid/liblog/libm/libdl/libc`（EGL/GLES 运行时 dlopen，符合预期）；GL API 导出齐全。
 - **注意**：`COMPILE.md` 的 Android 节是上游陈旧文档（提 Android.mk，本仓无此文件），以 CMake 工具链文件为准。
 - **运行时**：`DEFAULT_ES=3`（GLES3 后端）；远古 MC 可 `LIBGL_ES=1/2` 回落，其余 `LIBGL_*` 环境变量接口沿 gl4es 传统（见 [USAGE.md](./USAGE.md)）。
 
