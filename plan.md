@@ -12,8 +12,8 @@
 
 ## 工单序
 
-- [ ] **① 基座构建跑通**：NDK r30 + CMake 交叉编 **arm64-v8a + x86_64**（AVD 验证优先）。构建面事实：`CMakeLists.txt` 自带 `if(ANDROID)` 一等分支（`-DNOX11`、排除 `src/glx/glx.c`、链 `android`/`log`，EGL 运行时 dlopen，与 Pojav gl4es-114-extra 同形态）；硬约束 `CMAKE_CXX_STANDARD 23`（NDK ≥r26，r30 满足）；`DEFAULT_ES=3`，远古 MC 运行时 `LIBGL_ES=1/2` 回落。注意：COMPILE.md 的 Android 节是上游陈旧文档（提 Android.mk，实际无此文件），以 CMake 工具链文件为准。
-- [ ] **② 直移 `vert=4→3`**（`src/gl/gl4es.c` L222）：AVD 坏窗口回归 = 0.0.14a_08 / 0.0.23a_01 天空色块 + classic 色块全消，正常场景零回归。
+- [x] **① 基座构建跑通**：NDK r30 + CMake 交叉编 **arm64-v8a + x86_64**（AVD 验证优先）。构建面事实：`CMakeLists.txt` 自带 `if(ANDROID)` 一等分支（`-DNOX11`、排除 `src/glx/glx.c`、链 `android`/`log`，EGL 运行时 dlopen，与 Pojav gl4es-114-extra 同形态）；硬约束 `CMAKE_CXX_STANDARD 23`（NDK ≥r26，r30 满足）；`DEFAULT_ES=3`，远古 MC 运行时 `LIBGL_ES=1/2` 回落。注意：COMPILE.md 的 Android 节是上游陈旧文档（提 Android.mk，实际无此文件），以 CMake 工具链文件为准。
+- [x] **② 直移 `vert=4→3`**（`src/gl/gl4es.c` L222）：AVD 坏窗口回归 = 0.0.14a_08 / 0.0.23a_01 天空色块 + classic 色块全消，正常场景零回归。
 - [ ] **③ 产物入库主仓**：`libng_gl4es.so` 改名（建议 `libss_gl4es.so`，随品牌定名）进 `Seashore-Launcher/app/src/main/jniLibs/<abi>/`；主仓壳层注册渲染器条目并设默认（直接规避 QCL"切版本回落默认渲染器"的验证坑）。主仓侧维持 fork 期零 NDK。
 - [ ] **④（可选）C 侧零法线防御**：FPE `normalize` 前加零向量保护——可兜住一切发零法线的应用（不止 MC），但属对 GL spec 未定义区做行为固化，进 PR 前单独评估（卷宗 §35 选项 B）。
 - [ ] **⑤ 上游反哺**：C3F 一行修复提 BZLZHH/NG-GL4ES 与 ptitSeb/gl4es；ptitSeb/gl4es **#429**（b1.7.3+1.12.2 阴影三角，open 零定位）可按卷宗 §35 证据链回帖定位。

@@ -219,7 +219,7 @@ void APIENTRY_GL4ES gl4es_glInterleavedArrays(GLenum format, GLsizei stride, con
         break;
     case GL_C3F_V3F:
         color = 3;
-        vert = 4;
+        vert = 3;
         break;
     case GL_N3F_V3F:
         normal = 3;
