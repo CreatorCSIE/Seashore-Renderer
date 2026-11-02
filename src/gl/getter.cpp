@@ -375,13 +375,13 @@ extern "C"
                 if (use_mc_color == 1) {
                     version_builder << " §a"
 #if RELEASE == 1
-                                    << "Krypton Wrapper §b"
+                                    << "Seashore Renderer §b"
 #else
-                                    << "Krypton Wrapper §d"
+                                    << "Seashore Renderer §d"
 #endif
                                     << VERSION_TYPE;
                 } else {
-                    version_builder << " Krypton Wrapper " << VERSION_TYPE;
+                    version_builder << " Seashore Renderer " << VERSION_TYPE;
                 }
 
                 version_builder << MAJOR << "." << MINOR << "." << REVISION << VERSION_SUFFIX;
@@ -409,7 +409,7 @@ extern "C"
             return (const GLubyte*)rendererString.c_str();
         }
         case GL_SHADING_LANGUAGE_VERSION:
-            return (GLubyte*)"4.50 Krypton Wrapper with glslang and SPIRV-Cross";
+            return (GLubyte*)"4.50 Seashore Renderer with glslang and SPIRV-Cross";
         case GL_PROGRAM_ERROR_STRING_ARB:
             return (GLubyte*)glstate->glsl->error_msg;
         default:
